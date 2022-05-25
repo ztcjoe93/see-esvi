@@ -8,42 +8,47 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
+	"go.uber.org/zap"
+	"io/ioutil"
 )
 
 var (
 	targetDirectory *string
 	isRecursive     *bool
-	// targetFieldIndex  *int
-	// targetHeaderField *string
+	sugar *zap.SugaredLogger
 )
 
-func parseCsv(path string) [][]string {
-	file, err := os.Open(path)
-	if err != nil {
-		log.Fatal("Unable to read input file"+path, err)
+// parses all files retrieved sequentially
+func parseCsv(files []string) {
+	for _, file := range files {
+		filePath, err := os.Open(file)
+		if err != nil {
+			sugar.Errorw("Error opening .csv to parse",
+				"error_message", err,
+				"filePath_path", filePath,
+			)
+		}
+
+		defer filePath.Close()
+		csvReader := csv.NewReader(filePath)
+		records, err := csvReader.ReadAll()
+		if err != nil {
+			sugar.Errorw("Error parsing .csv filePath",
+				"error_message", err,
+				"filePath_path", filePath,
+			)
+		}
+
+		sugar.Infow("Success in parsing .csv file",
+			"file_path", filePath,
+			"headers", records[0],
+			"values", records[1:],
+		)
 	}
-	defer file.Close()
-
-	csvReader := csv.NewReader(file)
-	records, err := csvReader.ReadAll()
-
-	if err != nil {
-		log.Fatal("Unable to parse file csv "+path, err)
-	}
-
-	return records
 }
 
 // fetches all .csvs given a directory path
-func fetchCsvs(directory string, isRecursive bool) {
-	if directory == "" {
-		directory, err := os.Getwd()
-		if err != nil {
-			log.Fatal("Unable to get working directory"+directory, err)
-		}
-	}
-
+func fetchCsvs(directory string, isRecursive bool) []string {
 	var files []string
 
 	if isRecursive {
@@ -59,42 +64,73 @@ func fetchCsvs(directory string, isRecursive bool) {
 		})
 
 		if err != nil {
-			log.Fatal("Directory provided is invalid"+directory, err)
+			sugar.Errorw("Error when recursively visiting directories",
+				"error_message", err,
+			)
 		}
 
-		return
+		sugar.Infow("Retrieved all .csv files successfully.",
+			"recursive", isRecursive,
+			"files", files,
+		)
+
+		return files
 	}
 
-	fmt.Println(files)
+	items, _ := ioutil.ReadDir(directory)
+	for _, item := range items {
+		if !item.IsDir() {
+			path := filepath.Join(directory, item.Name())
+			matched, _ := filepath.Match("*.csv", filepath.Base(path))
+			if matched {
+				files = append(files, path)
+			}
+		}
+	}
+	sugar.Infow("Retrieved all .csv files successfully.",
+		"recursive", isRecursive,
+		"files", files,
+	)
+
+	return files
 }
 
 // utility function to parse all cli arguments
-func cliArgParse() {
-	targetDirectory = flag.String("t", "", "target directory to look for csv files to parse")
+func cliArgParse() string {
 	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
-	// targetFieldIndex = flag.Int("f", 0, "target field (index) to extract value from")
-	// targetHeaderField = flag.String("h", "", "target header to extract values from")
 	flag.Parse()
 
 	flag.VisitAll(func(f *flag.Flag) {
 		fmt.Printf("%s: %s\n", f.Name, f.Value)
 	})
 
-	testValue := flag.Args()
-
-	var i interface{}
-	i = testValue
-	fmt.Println(reflect.TypeOf(testValue))
-	fmt.Println(testValue)
-	if _, isList := i.([]string); isList {
+	targetPath := flag.Args()
+	if len(targetPath) > 1 {
 		log.Fatal("Multiple filepaths provided")
+	} else if len(targetPath) == 0 {
+		log.Fatal("No filepath provided")
 	}
+	sugar.Infow("Retrieved directory pathname from cli arguments",
+		"directory", targetPath[0],
+	)
+	return targetPath[0]
 }
 
+
 func main() {
-	cliArgParse()
+	cfg := zap.NewDevelopmentConfig()
 
-	// fetchCsvs(*targetDirectory, *isRecursive)
+	cfg.OutputPaths = []string{"/home/joe/go/see-esvi/debug.log", "stderr"}
+	logger, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync()
 
-	// exPath := filepath.Dir(parentPath)
+	sugar = logger.Sugar()
+	sugar.Infow("Logger initialization completed.")
+
+	path := cliArgParse()
+	csvFiles := fetchCsvs(path, *isRecursive)
+	parseCsv(csvFiles)
 }
