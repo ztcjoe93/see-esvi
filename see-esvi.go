@@ -120,9 +120,12 @@ func cliArgParse() string {
 func main() {
 	cfg := zap.NewDevelopmentConfig()
 
-	err := os.Mkdir("/var/log/see-esvi", 0700)
+	_, err := os.Stat("/var/log/see-esvi")
 	if err != nil {
-		panic(err)
+		err := os.Mkdir("/var/log/see-esvi", 0700)
+		if err != nil {
+			panic(err)
+		}
 	}
 	cfg.OutputPaths = []string{"/var/log/see-esvi/debug.log", "stderr"}
 	logger, err := cfg.Build()
