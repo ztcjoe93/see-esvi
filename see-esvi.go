@@ -15,7 +15,9 @@ import (
 var (
 	targetDirectory *string
 	isRecursive     *bool
+	targetField     *int
 	sugar           *zap.SugaredLogger
+	dataSlice       []*Data
 )
 
 type Data struct {
@@ -55,6 +57,7 @@ func parseCsv(files []string) {
 		}
 
 		parsedRecord := newData(file, records)
+		dataSlice = append(dataSlice, parsedRecord)
 
 		sugar.Infow("Success in parsing .csv file",
 			"file_path", parsedRecord.name,
@@ -115,6 +118,7 @@ func fetchCsvs(directory string, isRecursive bool) []string {
 // utility function to parse all cli arguments
 func cliArgParse() string {
 	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
+	targetField = flag.Int("tf", 0, "target field by index for value lookup")
 	flag.Parse()
 
 	targetPath := flag.Args()
@@ -141,8 +145,6 @@ func main() {
 	defer logger.Sync()
 
 	sugar = logger.Sugar()
-	sugar.Infow("Logger initialization completed.")
-
 	path := cliArgParse()
 	csvFiles := fetchCsvs(path, *isRecursive)
 	parseCsv(csvFiles)
