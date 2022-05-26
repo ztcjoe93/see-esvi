@@ -3,20 +3,35 @@ package main
 import (
 	"encoding/csv"
 	"flag"
-	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
 	"go.uber.org/zap"
-	"io/ioutil"
 )
 
 var (
 	targetDirectory *string
 	isRecursive     *bool
-	sugar *zap.SugaredLogger
+	sugar           *zap.SugaredLogger
 )
+
+type Data struct {
+	name    string
+	headers []string
+	values  [][]string
+}
+
+func newData(path string, csvRecord [][]string) *Data {
+
+	data := Data{name: filepath.Base(path)}
+	data.headers = csvRecord[0]
+	data.values = csvRecord[1:]
+
+	return &data
+}
 
 // parses all files retrieved sequentially
 func parseCsv(files []string) {
@@ -39,10 +54,12 @@ func parseCsv(files []string) {
 			)
 		}
 
+		parsedRecord := newData(file, records)
+
 		sugar.Infow("Success in parsing .csv file",
-			"file_path", filePath,
-			"headers", records[0],
-			"values", records[1:],
+			"file_path", parsedRecord.name,
+			"headers", parsedRecord.headers,
+			"values", parsedRecord.values,
 		)
 	}
 }
@@ -100,10 +117,6 @@ func cliArgParse() string {
 	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
 	flag.Parse()
 
-	flag.VisitAll(func(f *flag.Flag) {
-		fmt.Printf("%s: %s\n", f.Name, f.Value)
-	})
-
 	targetPath := flag.Args()
 	if len(targetPath) > 1 {
 		log.Fatal("Multiple filepaths provided")
@@ -116,18 +129,11 @@ func cliArgParse() string {
 	return targetPath[0]
 }
 
-
 func main() {
 	cfg := zap.NewDevelopmentConfig()
 
-	_, err := os.Stat("/var/log/see-esvi")
-	if err != nil {
-		err := os.Mkdir("/var/log/see-esvi", 0700)
-		if err != nil {
-			panic(err)
-		}
-	}
-	cfg.OutputPaths = []string{"/var/log/see-esvi/debug.log", "stderr"}
+	_, err := os.Stat(".")
+	cfg.OutputPaths = []string{"./debug.log", "stderr"}
 	logger, err := cfg.Build()
 	if err != nil {
 		panic(err)
