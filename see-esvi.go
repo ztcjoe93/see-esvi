@@ -123,9 +123,9 @@ func cliArgParse() string {
 
 	targetPath := flag.Args()
 	if len(targetPath) > 1 {
-		log.Fatal("Multiple filepaths provided")
+		log.Panic("Multiple filepaths provided")
 	} else if len(targetPath) == 0 {
-		log.Fatal("No filepath provided")
+		log.Panic("No filepath provided")
 	}
 	sugar.Infow("Retrieved directory pathname from cli arguments",
 		"directory", targetPath[0],
