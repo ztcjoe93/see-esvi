@@ -16,10 +16,10 @@ type CliTestSuite struct {
 }
 
 func (s *CliTestSuite) SetupTest() {
-	s.initialArgs = os.Args
-}
-
-func (s *CliTestSuite) BeforeTest() {
+	if s.initialArgs == nil {
+		s.initialArgs = os.Args
+	}
+	os.Args = s.initialArgs
 	cfg := zap.NewDevelopmentConfig()
 	_, err := os.Stat(".")
 
@@ -33,20 +33,20 @@ func (s *CliTestSuite) BeforeTest() {
 	sugar = logger.Sugar()
 }
 
-func (s *CliTestSuite) AfterTest() {
-	os.Args = s.initialArgs
+func TestCliTestSuite(t *testing.T) {
+	suite.Run(t, new(CliTestSuite))
 }
 
-func TestCliArgParsePathProvided(t *testing.T) {
-	os.Args = append(os.Args, "test")
-	fmt.Println(os.Args)
-	assert.NotPanics(t, func() {
-		cliArgParse()
+func (s *CliTestSuite) TestCliArgParsePathProvided() {
+	os.Args = append(os.Args, "somefilepath")
+	cliArgParse()
+	assert.NotPanics(s.T(), func() {
 	})
 }
 
-func TestCliArgParseNoPathProvided(t *testing.T) {
-	assert.Panics(t, func() {
+func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
+	fmt.Println(os.Args)
+	assert.Panics(s.T(), func() {
 		cliArgParse()
 	})
 }

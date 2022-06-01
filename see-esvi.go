@@ -14,8 +14,8 @@ import (
 
 var (
 	targetDirectory *string
-	isRecursive     *bool
-	targetField     *int
+	isRecursive     = flag.Bool("r", false, "should recursively look for files or not")
+	targetField     = flag.Int("tf", 0, "target field by index for value lookup")
 	sugar           *zap.SugaredLogger
 	dataSlice       []*Data
 )
@@ -117,11 +117,10 @@ func fetchCsvs(directory string, isRecursive bool) []string {
 
 // utility function to parse all cli arguments
 func cliArgParse() string {
-	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
-	targetField = flag.Int("tf", 0, "target field by index for value lookup")
-	flag.Parse()
 
+	flag.Parse()
 	targetPath := flag.Args()
+
 	if len(targetPath) > 1 {
 		log.Panic("Multiple filepaths provided")
 	} else if len(targetPath) == 0 {
