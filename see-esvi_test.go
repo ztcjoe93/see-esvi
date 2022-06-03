@@ -12,14 +12,10 @@ import (
 
 type CliTestSuite struct {
 	suite.Suite
-	initialArgs []string
 }
 
 func (s *CliTestSuite) SetupTest() {
-	if s.initialArgs == nil {
-		s.initialArgs = os.Args
-	}
-	os.Args = s.initialArgs
+	os.Args = []string{"golang_script"}
 	cfg := zap.NewDevelopmentConfig()
 	_, err := os.Stat(".")
 
@@ -38,9 +34,17 @@ func TestCliTestSuite(t *testing.T) {
 }
 
 func (s *CliTestSuite) TestCliArgParsePathProvided() {
-	os.Args = append(os.Args, "somefilepath")
-	cliArgParse()
+	os.Args = []string{"golang_script", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
+		cliArgParse()
+	})
+}
+
+func (s *CliTestSuite) TestCliArgParsePathRecursive() {
+	os.Args = []string{"golang_script", "-r=true", "someFilePath"}
+	assert.NotPanics(s.T(), func() {
+		cliArgParse()
+		assert.True(s.T(), *isRecursive)
 	})
 }
 

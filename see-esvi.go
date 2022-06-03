@@ -13,11 +13,10 @@ import (
 )
 
 var (
-	targetDirectory *string
-	isRecursive     = flag.Bool("r", false, "should recursively look for files or not")
-	targetField     = flag.Int("tf", 0, "target field by index for value lookup")
-	sugar           *zap.SugaredLogger
-	dataSlice       []*Data
+	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
+	targetField = flag.Int("tf", 0, "target field by index for value lookup")
+	sugar       *zap.SugaredLogger
+	dataSlice   []*Data
 )
 
 type Data struct {
