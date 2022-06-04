@@ -50,6 +50,13 @@ func (s *CliTestSuite) TestCliArgParsePathProvided() {
 	})
 }
 
+func (s *CliTestSuite) TestCliArgMultipleParsePathProvided() {
+	os.Args = []string{"golang_script", "someFilePath", "anotherFilePath"}
+	assert.Panics(s.T(), func() {
+		cliArgParse()
+	})
+}
+
 func (s *CliTestSuite) TestCliArgParsePathRecursive() {
 	os.Args = []string{"golang_script", "-r", "someFilePath"}
 	assert.NotPanics(s.T(), func() {

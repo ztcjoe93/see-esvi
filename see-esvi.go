@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/csv"
 	"flag"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -48,6 +48,27 @@ func newData(path string, csvRecord [][]string) *Data {
 	data.values = csvRecord[1:]
 
 	return &data
+}
+
+func showData() {
+	var targetIndex int
+	switch typeof(targetField) {
+	case "string":
+		for headerIndex, header := range dataSlice[0].headers {
+			if header == targetField {
+				targetIndex = headerIndex
+				break
+			}
+		}
+	case "int":
+		targetIndex = targetField.(int)
+	}
+
+	for _, data := range dataSlice {
+		for _, record := range data.values {
+			fmt.Println(record[targetIndex])
+		}
+	}
 }
 
 // parses all files retrieved sequentially
@@ -130,23 +151,6 @@ func fetchCsvs(directory string, isRecursive bool) []string {
 	return files
 }
 
-// utility function to parse all cli arguments
-func cliArgParse() string {
-
-	flag.Parse()
-	targetPath := flag.Args()
-
-	if len(targetPath) > 1 {
-		log.Panic("Multiple filepaths provided")
-	} else if len(targetPath) == 0 {
-		log.Panic("No filepath provided")
-	}
-	sugar.Infow("Retrieved directory pathname from cli arguments",
-		"directory", targetPath[0],
-	)
-	return targetPath[0]
-}
-
 func main() {
 	cfg := zap.NewDevelopmentConfig()
 
@@ -165,4 +169,5 @@ func main() {
 	path := cliArgParse()
 	csvFiles := fetchCsvs(path, *isRecursive)
 	parseCsv(csvFiles)
+	showData()
 }
