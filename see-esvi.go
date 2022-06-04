@@ -8,16 +8,32 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"go.uber.org/zap"
 )
 
 var (
 	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
-	targetField = flag.Int("tf", 0, "target field by index for value lookup")
-	sugar       *zap.SugaredLogger
-	dataSlice   []*Data
+	// if no arguments are provided, initialize to look at index 0 of csv
+	targetField interface{} = 0
+
+	sugar     *zap.SugaredLogger
+	dataSlice []*Data
 )
+
+func init() {
+	// checking if -tf argument is a field index or field name
+	flag.Func("tf", "target field by index or name for value lookup", func(stringVal string) error {
+		intVal, err := strconv.Atoi(stringVal)
+		if err != nil {
+			targetField = stringVal
+		} else {
+			targetField = intVal
+		}
+		return nil
+	})
+}
 
 type Data struct {
 	name    string

@@ -35,12 +35,18 @@ func TestCliTestSuite(t *testing.T) {
 	suite.Run(t, new(CliTestSuite))
 }
 
+func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
+	assert.Panics(s.T(), func() {
+		cliArgParse()
+	})
+}
+
 func (s *CliTestSuite) TestCliArgParsePathProvided() {
 	os.Args = []string{"golang_script", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
 		assert.False(s.T(), *isRecursive)
-		assert.Equal(s.T(), 0, *targetField)
+		assert.Equal(s.T(), 0, targetField)
 	})
 }
 
@@ -52,16 +58,18 @@ func (s *CliTestSuite) TestCliArgParsePathRecursive() {
 	})
 }
 
-func (s *CliTestSuite) TestCliArgParseTargetField() {
+func (s *CliTestSuite) TestCliArgParseTargetFieldInt() {
 	os.Args = []string{"golang_script", "-tf=5", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
-		assert.Equal(s.T(), 5, *targetField)
+		assert.Equal(s.T(), 5, targetField)
 	})
 }
 
-func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
-	assert.Panics(s.T(), func() {
+func (s *CliTestSuite) TestCliArgParseTargetFieldString() {
+	os.Args = []string{"golang_script", "-tf=someHeader", "someFilePath"}
+	assert.NotPanics(s.T(), func() {
 		cliArgParse()
+		assert.Equal(s.T(), "someHeader", targetField)
 	})
 }
