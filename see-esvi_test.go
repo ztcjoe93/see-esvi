@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -18,6 +17,9 @@ func (s *CliTestSuite) SetupTest() {
 	os.Args = []string{"golang_script"}
 	cfg := zap.NewDevelopmentConfig()
 	_, err := os.Stat(".")
+	if err != nil {
+		panic(err)
+	}
 
 	cfg.OutputPaths = []string{"stderr"}
 	logger, err := cfg.Build()
@@ -37,19 +39,28 @@ func (s *CliTestSuite) TestCliArgParsePathProvided() {
 	os.Args = []string{"golang_script", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
+		assert.False(s.T(), *isRecursive)
+		assert.Equal(s.T(), 0, *targetField)
 	})
 }
 
 func (s *CliTestSuite) TestCliArgParsePathRecursive() {
-	os.Args = []string{"golang_script", "-r=true", "someFilePath"}
+	os.Args = []string{"golang_script", "-r", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
 		assert.True(s.T(), *isRecursive)
 	})
 }
 
+func (s *CliTestSuite) TestCliArgParseTargetField() {
+	os.Args = []string{"golang_script", "-tf=5", "someFilePath"}
+	assert.NotPanics(s.T(), func() {
+		cliArgParse()
+		assert.Equal(s.T(), 5, *targetField)
+	})
+}
+
 func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
-	fmt.Println(os.Args)
 	assert.Panics(s.T(), func() {
 		cliArgParse()
 	})

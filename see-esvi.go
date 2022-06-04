@@ -135,6 +135,9 @@ func main() {
 	cfg := zap.NewDevelopmentConfig()
 
 	_, err := os.Stat(".")
+	if err != nil {
+		panic(err)
+	}
 	cfg.OutputPaths = []string{"./debug.log", "stderr"}
 	logger, err := cfg.Build()
 	if err != nil {
