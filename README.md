@@ -14,12 +14,12 @@ $ go build
 ### Running
 Execute the binary file with the necessary arguments
 ```shell
-$ ./see-esvi <flags> <directory_with_csv_files>
+$ ./see-esvi <flags> <command> <directory_with_csv_files>
 ```
 
 Or simply run it
 ```shell
-$ go run see-esvi.go <flags> <directory_with_csv_files>
+$ go run see-esvi.go <flags> <command> <directory_with_csv_files>
 ```
 
 ### Tests
@@ -37,6 +37,13 @@ $ export CGO_ENABLED=0
 ```
 
 For information on why the cgo tool is required, you can refer to this [link](https://pkg.go.dev/cmd/cgo#:~:text=The%20cgo%20tool%20is%20enabled,to%200%20to%20disable%20it.)
+
+
+## Commands
+| Command | Description |
+| --- | --- |
+| read | Simple read command on csvs, will return target field values |
+| modify | Modify command on csvs, will modify target field value to specified value | 
 
 ## CLI arguments
 | Flag | Description |
