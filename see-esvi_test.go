@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,6 +37,32 @@ func TestCliTestSuite(t *testing.T) {
 	suite.Run(t, new(CliTestSuite))
 }
 
+func (s *CliTestSuite) TestParseCommandRead() {
+	cmd, err := parseCommand("read")
+	assert.Nil(s.T(), err)
+
+	// https://github.com/stretchr/testify/issues/182
+	cmdFn := runtime.FuncForPC(reflect.ValueOf(cmd).Pointer()).Name()
+	readFn := runtime.FuncForPC(reflect.ValueOf(readData).Pointer()).Name()
+
+	assert.Equal(s.T(), cmdFn, readFn)
+}
+
+func (s *CliTestSuite) TestParseCommandModify() {
+	cmd, err := parseCommand("modify")
+	assert.Nil(s.T(), err)
+
+	cmdFn := runtime.FuncForPC(reflect.ValueOf(cmd).Pointer()).Name()
+	modifyFn := runtime.FuncForPC(reflect.ValueOf(modifyData).Pointer()).Name()
+
+	assert.Equal(s.T(), cmdFn, modifyFn)
+}
+
+func (s *CliTestSuite) TestParseCommandInvalid() {
+	_, err := parseCommand("asdf12!@#")
+	assert.NotNil(s.T(), err)
+}
+
 func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
 	assert.Panics(s.T(), func() {
 		cliArgParse()
@@ -42,23 +70,25 @@ func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
 }
 
 func (s *CliTestSuite) TestCliArgParsePathProvided() {
-	os.Args = []string{"golang_script", "someFilePath"}
+	os.Args = []string{"golang_script", "read", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
-		cliArgParse()
+		_, path := cliArgParse()
+
+		assert.Equal(s.T(), "someFilePath", path)
 		assert.False(s.T(), *isRecursive)
 		assert.Equal(s.T(), 0, targetField)
 	})
 }
 
 func (s *CliTestSuite) TestCliArgMultipleParsePathProvided() {
-	os.Args = []string{"golang_script", "someFilePath", "anotherFilePath"}
+	os.Args = []string{"golang_script", "read", "someFilePath", "anotherFilePath"}
 	assert.Panics(s.T(), func() {
 		cliArgParse()
 	})
 }
 
 func (s *CliTestSuite) TestCliArgParsePathRecursive() {
-	os.Args = []string{"golang_script", "-r", "someFilePath"}
+	os.Args = []string{"golang_script", "-r", "read", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
 		assert.True(s.T(), *isRecursive)
@@ -66,7 +96,7 @@ func (s *CliTestSuite) TestCliArgParsePathRecursive() {
 }
 
 func (s *CliTestSuite) TestCliArgParseTargetFieldInt() {
-	os.Args = []string{"golang_script", "-tf=5", "someFilePath"}
+	os.Args = []string{"golang_script", "-tf=5", "read", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
 		assert.Equal(s.T(), 5, targetField)
@@ -74,7 +104,7 @@ func (s *CliTestSuite) TestCliArgParseTargetFieldInt() {
 }
 
 func (s *CliTestSuite) TestCliArgParseTargetFieldString() {
-	os.Args = []string{"golang_script", "-tf=someHeader", "someFilePath"}
+	os.Args = []string{"golang_script", "-tf=someHeader", "read", "someFilePath"}
 	assert.NotPanics(s.T(), func() {
 		cliArgParse()
 		assert.Equal(s.T(), "someHeader", targetField)

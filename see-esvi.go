@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/csv"
 	"flag"
-	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -17,6 +16,7 @@ var (
 	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
 	// if no arguments are provided, initialize to look at index 0 of csv
 	targetField interface{} = 0
+	cmdVal      string
 
 	sugar     *zap.SugaredLogger
 	dataSlice []*Data
@@ -41,6 +41,7 @@ type Data struct {
 	values  [][]string
 }
 
+// convenience function to initialize a Data struct
 func newData(path string, csvRecord [][]string) *Data {
 
 	data := Data{name: filepath.Base(path)}
@@ -48,27 +49,6 @@ func newData(path string, csvRecord [][]string) *Data {
 	data.values = csvRecord[1:]
 
 	return &data
-}
-
-func showData() {
-	var targetIndex int
-	switch typeof(targetField) {
-	case "string":
-		for headerIndex, header := range dataSlice[0].headers {
-			if header == targetField {
-				targetIndex = headerIndex
-				break
-			}
-		}
-	case "int":
-		targetIndex = targetField.(int)
-	}
-
-	for _, data := range dataSlice {
-		for _, record := range data.values {
-			fmt.Println(record[targetIndex])
-		}
-	}
 }
 
 // parses all files retrieved sequentially
@@ -166,8 +146,8 @@ func main() {
 	defer logger.Sync()
 
 	sugar = logger.Sugar()
-	path := cliArgParse()
+	cmd, path := cliArgParse()
 	csvFiles := fetchCsvs(path, *isRecursive)
 	parseCsv(csvFiles)
-	showData()
+	cmd()
 }
