@@ -1,36 +1,34 @@
 package main
 
 import (
+	"encoding/csv"
 	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"os"
 )
 
 // this file consists of logic processing for the command flag (<command> <csv_directory>)
 
 // parse command from cli
-func parseCommand(cmd string) (res func(), err error) {
-	cmdVal = cmd
+func parseCommand(params []string) (res func(), err error) {
+	cmdVal := params[0]
 
-	switch cmd {
+	switch cmdVal {
 	case "read":
 		return readData, nil
 	case "modify":
+		if *valFlag == "" {
+			return nil, errors.New("no value provided to valFlag")
+		}
 		return modifyData, nil
 	default:
 		return nil, errors.New("invalid command")
 	}
 }
 
-func modifyData() {
-	// TODO logic to modify targeted fields to specific value
-	// we may want to add some conditional parsing? (i.e x <= y, x > z)
-	// may want to target multiple fields...? how would that affect the conditional parsing
-	fmt.Println("modifying data...")
-}
-
-func readData() {
+func getTargetField() int {
 	var targetIndex int
 	switch typeof(targetField) {
 	case "string":
@@ -43,6 +41,39 @@ func readData() {
 	case "int":
 		targetIndex = targetField.(int)
 	}
+
+	return targetIndex
+}
+
+func modifyData() {
+	// TODO logic to modify targeted fields to specific value
+	// we may want to add some conditional parsing? (i.e x <= y, x > z)
+	// may want to target multiple fields...? how would that affect the conditional parsing
+
+	targetIndex := getTargetField()
+
+	for _, data := range dataSlice {
+		f, err := os.Create("output.csv")
+		if err != nil {
+			log.Panic(err)
+		}
+		defer f.Close()
+
+		writer := csv.NewWriter(f)
+		defer writer.Flush()
+
+		writer.Write(data.headers)
+
+		for _, record := range data.values {
+			record[targetIndex] = *valFlag
+			writer.Write(record)
+		}
+	}
+
+}
+
+func readData() {
+	targetIndex := getTargetField()
 
 	for _, data := range dataSlice {
 		for _, record := range data.values {
@@ -57,7 +88,7 @@ func cliArgParse() (func(), string) {
 	flag.Parse()
 
 	arguments := flag.Args()
-	cmdFn, err := parseCommand(arguments[0])
+	cmdFn, err := parseCommand(arguments[0 : len(arguments)-1])
 	if err != nil {
 		sugar.Panicw("Command passed does not exist",
 			"function", "parseCommand()",
