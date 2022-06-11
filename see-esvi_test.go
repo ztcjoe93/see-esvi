@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"runtime"
@@ -16,7 +18,13 @@ type CliTestSuite struct {
 }
 
 func (s *CliTestSuite) SetupTest() {
+	// to reset cli args
 	os.Args = []string{"golang_script"}
+
+	// to reset valFlag
+	val := ""
+	valFlag = &val
+
 	cfg := zap.NewDevelopmentConfig()
 	_, err := os.Stat(".")
 	if err != nil {
@@ -49,6 +57,8 @@ func (s *CliTestSuite) TestParseCommandRead() {
 }
 
 func (s *CliTestSuite) TestParseCommandModify() {
+	str := "someVal"
+	valFlag = &str
 	cmd, err := parseCommand("modify")
 	assert.Nil(s.T(), err)
 
@@ -56,6 +66,14 @@ func (s *CliTestSuite) TestParseCommandModify() {
 	modifyFn := runtime.FuncForPC(reflect.ValueOf(modifyData).Pointer()).Name()
 
 	assert.Equal(s.T(), cmdFn, modifyFn)
+}
+
+func (s *CliTestSuite) TestParseCommandModifyNoValFlag() {
+	_, err := parseCommand("modify")
+	fmt.Println(err)
+	if assert.Error(s.T(), err) {
+		assert.Equal(s.T(), errors.New("no value provided to valFlag"), err)
+	}
 }
 
 func (s *CliTestSuite) TestParseCommandInvalid() {

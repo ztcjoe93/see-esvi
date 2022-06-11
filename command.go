@@ -12,8 +12,8 @@ import (
 // this file consists of logic processing for the command flag (<command> <csv_directory>)
 
 // parse command from cli
-func parseCommand(params []string) (res func(), err error) {
-	cmdVal := params[0]
+func parseCommand(param string) (res func(), err error) {
+	cmdVal := param
 
 	switch cmdVal {
 	case "read":
@@ -88,7 +88,7 @@ func cliArgParse() (func(), string) {
 	flag.Parse()
 
 	arguments := flag.Args()
-	cmdFn, err := parseCommand(arguments[0 : len(arguments)-1])
+	cmdFn, err := parseCommand(arguments[0])
 	if err != nil {
 		sugar.Panicw("Command passed does not exist",
 			"function", "parseCommand()",

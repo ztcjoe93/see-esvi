@@ -14,7 +14,7 @@ import (
 
 var (
 	isRecursive = flag.Bool("r", false, "should recursively look for files or not")
-	valFlag     = flag.String("v", "", "value to be used in commands")
+	valFlag     = flag.String("mv", "", "value to be used in commands")
 	// if no arguments are provided, initialize to look at index 0 of csv
 	targetField interface{} = 0
 	cmdVal      string
