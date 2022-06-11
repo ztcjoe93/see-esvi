@@ -53,7 +53,7 @@ func modifyData() {
 	targetIndex := getTargetField()
 
 	for _, data := range dataSlice {
-		f, err := os.Create("output.csv")
+		f, err := os.Create("./output/" + data.name)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -88,6 +88,10 @@ func cliArgParse() (func(), string) {
 	flag.Parse()
 
 	arguments := flag.Args()
+	if len(arguments) == 0 {
+		log.Panic("No arguments provided")
+	}
+
 	cmdFn, err := parseCommand(arguments[0])
 	if err != nil {
 		sugar.Panicw("Command passed does not exist",
