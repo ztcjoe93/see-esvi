@@ -107,8 +107,8 @@ func fetchCsvs(directory string, isRecursive bool) []string {
 		}
 
 		sugar.Infow("Retrieved all .csv files successfully.",
-			"recursive", isRecursive,
-			"files", files,
+			"directory", directory,
+			"csv_files", files,
 		)
 
 		return files
@@ -125,8 +125,8 @@ func fetchCsvs(directory string, isRecursive bool) []string {
 		}
 	}
 	sugar.Infow("Retrieved all .csv files successfully.",
-		"recursive", isRecursive,
-		"files", files,
+		"directory", directory,
+		"csv_files", files,
 	)
 
 	return files

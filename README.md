@@ -46,7 +46,8 @@ For information on why the cgo tool is required, you can refer to this [link](ht
 | modify | Modify command on csvs, will modify target field value to specified value | 
 
 ## CLI arguments
-| Flag | Description |
-| --- | --- |
-| -r | Look for .csv files recursively in the given directory
-| -tf | Target field index or name to retrieve values from 
+| Flag | Command | Description |
+| --- | --- | --- |
+| -r | read/modify | Look for .csv files recursively in the given directory
+| -tf | ready/modify | Target field index or name to retrieve values from 
+| -v | modify | Value to replace target field when modifying 

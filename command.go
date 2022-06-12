@@ -96,6 +96,7 @@ func cliArgParse() (func(), string) {
 	if err != nil {
 		sugar.Panicw("Command passed does not exist",
 			"function", "parseCommand()",
+			"argument", arguments[0],
 			"err", err.Error(),
 		)
 	}
@@ -107,11 +108,13 @@ func cliArgParse() (func(), string) {
 	} else if len(path) == 0 {
 		log.Panic("No filepath provided")
 	}
-	sugar.Infow("Retrieved directory pathname from cli arguments",
-		"function", "cliArgparse()",
-		"directory_pathname", path[0],
+	sugar.Infow("Finished parsing cli arguments and path names",
+		"function", "cliArgParse",
+		"-r", *isRecursive,
+		"-tf", targetField,
+		"-v", *valFlag,
+		"csv_directory", path[0],
 	)
-	fmt.Printf("%s -> %s\n", path[0], cmdVal)
 
 	return cmdFn, path[0]
 }
