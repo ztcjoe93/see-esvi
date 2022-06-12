@@ -4,9 +4,10 @@ import (
 	"encoding/csv"
 	"errors"
 	"flag"
-	"fmt"
 	"log"
 	"os"
+
+	"go.uber.org/zap"
 )
 
 // this file consists of logic processing for the command flag (<command> <csv_directory>)
@@ -75,10 +76,25 @@ func modifyData() {
 func readData() {
 	targetIndex := getTargetField()
 
+	channel := make(chan struct{})
+
 	for _, data := range dataSlice {
-		for _, record := range data.values {
-			fmt.Println(record[targetIndex])
-		}
+		go func(data *Data, sugar *zap.SugaredLogger) {
+			valSlice := make([]string, 0)
+			for _, record := range data.values {
+				valSlice = append(valSlice, record[targetIndex])
+			}
+			sugar.Infow("Completed parsing file",
+				"file_name", data.name,
+				"headers", data.headers,
+				"values", valSlice,
+			)
+			channel <- struct{}{}
+		}(data, sugar)
+	}
+
+	for i := 0; i < len(dataSlice); i++ {
+		<-channel
 	}
 }
 

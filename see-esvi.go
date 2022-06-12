@@ -76,11 +76,11 @@ func parseCsv(files []string) {
 		parsedRecord := newData(file, records)
 		dataSlice = append(dataSlice, parsedRecord)
 
-		sugar.Infow("Success in parsing .csv file",
-			"file_path", parsedRecord.name,
-			"headers", parsedRecord.headers,
-			"values", parsedRecord.values,
-		)
+		// sugar.Infow("Success in parsing .csv file",
+		// 	"file_path", parsedRecord.name,
+		// 	"headers", parsedRecord.headers,
+		// 	"values", parsedRecord.values,
+		// )
 	}
 }
 
@@ -138,7 +138,7 @@ func main() {
 	outputPath := filepath.Join(".", "output")
 	_ = os.MkdirAll(outputPath, os.ModePerm)
 
-	cfg.OutputPaths = []string{"./debug.log", "stderr"}
+	cfg.OutputPaths = []string{"./debug.log"} //, "stderr"}
 	logger, err := cfg.Build()
 	if err != nil {
 		panic(err)
