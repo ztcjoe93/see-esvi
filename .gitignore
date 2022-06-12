@@ -19,6 +19,7 @@
 
 # additional stuff to ignore
 *.csv
+*.log
 
 # Go workspace file
 go.work
