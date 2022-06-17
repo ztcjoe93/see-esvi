@@ -63,5 +63,5 @@ For information on why the cgo tool is required, you can refer to this [link](ht
 | Flag | Command | Description |
 | --- | --- | --- |
 | -r | read/modify | Look for .csv files recursively in the given directory
-| -tf | ready/modify | Target field index or name to retrieve values from 
+| -tf | read/modify | Target field index or name to retrieve values from 
 | -v | modify | Value to replace target field when modifying 
