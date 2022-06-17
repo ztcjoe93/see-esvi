@@ -10,6 +10,10 @@ Build the binary file with
 $ go build
 ```
 
+If you have docker installed, you can build the docker image file with
+```shell
+$ sudo docker build -t <name/tag> .
+```
 
 ### Running
 Execute the binary file with the necessary arguments
@@ -20,6 +24,16 @@ $ ./see-esvi <flags> <command> <directory_with_csv_files>
 Or simply run it
 ```shell
 $ go run see-esvi.go <flags> <command> <directory_with_csv_files>
+```
+
+To run in the docker container
+```
+$ sudo docker run -v <host_directory>:<mounted_directory> <name/tag> ./see-esvi <flags> <command> <mounted_directory>
+```
+
+You can also modify the respective docker-compose.yml file and run
+```shell
+$ sudo docker-compose up
 ```
 
 ### Tests

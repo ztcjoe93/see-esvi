@@ -1,0 +1,7 @@
+version: "0.1"
+services:
+  app:
+    image: joe/see-esvi
+    command: ./see-esvi -r read /folder
+    volumes:
+      - ./:/folder
