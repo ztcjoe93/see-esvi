@@ -6,8 +6,6 @@ import (
 	"flag"
 	"log"
 	"os"
-
-	"go.uber.org/zap"
 )
 
 // this file consists of logic processing for the command flag (<command> <csv_directory>)
@@ -47,30 +45,39 @@ func getTargetField() int {
 }
 
 func modifyData() {
-	// TODO logic to modify targeted fields to specific value
-	// we may want to add some conditional parsing? (i.e x <= y, x > z)
-	// may want to target multiple fields...? how would that affect the conditional parsing
-
 	targetIndex := getTargetField()
 
+	channel := make(chan struct{})
+
 	for _, data := range dataSlice {
-		f, err := os.Create("./output/" + data.name)
-		if err != nil {
-			log.Panic(err)
-		}
-		defer f.Close()
+		go func(data *Data) {
+			f, err := os.Create("./output/" + data.name)
+			if err != nil {
+				log.Panic(err)
+			}
+			defer f.Close()
 
-		writer := csv.NewWriter(f)
-		defer writer.Flush()
+			writer := csv.NewWriter(f)
+			defer writer.Flush()
 
-		writer.Write(data.headers)
+			writer.Write(data.headers)
 
-		for _, record := range data.values {
-			record[targetIndex] = *valFlag
-			writer.Write(record)
-		}
+			for _, record := range data.values {
+				record[targetIndex] = *valFlag
+				writer.Write(record)
+			}
+
+			sugar.Infow("Completed modifying file",
+				"file_name", data.name,
+				"modify_value", *valFlag,
+			)
+			channel <- struct{}{}
+		}(data)
 	}
 
+	for i := 0; i < len(dataSlice); i++ {
+		<-channel
+	}
 }
 
 func readData() {
@@ -79,7 +86,7 @@ func readData() {
 	channel := make(chan struct{})
 
 	for _, data := range dataSlice {
-		go func(data *Data, sugar *zap.SugaredLogger) {
+		go func(data *Data) {
 			valSlice := make([]string, 0)
 			for _, record := range data.values {
 				valSlice = append(valSlice, record[targetIndex])
@@ -90,7 +97,7 @@ func readData() {
 				"values", valSlice,
 			)
 			channel <- struct{}{}
-		}(data, sugar)
+		}(data)
 	}
 
 	for i := 0; i < len(dataSlice); i++ {

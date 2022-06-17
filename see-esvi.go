@@ -54,34 +54,44 @@ func newData(path string, csvRecord [][]string) *Data {
 
 // parses all files retrieved sequentially
 func parseCsv(files []string) {
+	channel := make(chan Data)
+
 	for _, file := range files {
-		filePath, err := os.Open(file)
-		if err != nil {
-			sugar.Errorw("Error opening .csv to parse",
-				"error_message", err,
-				"filePath_path", filePath,
+		go func(file string) {
+			filePath, err := os.Open(file)
+			if err != nil {
+				sugar.Errorw("Error opening .csv to parse",
+					"error_message", err,
+					"filePath_path", filePath,
+				)
+			}
+
+			defer filePath.Close()
+			csvReader := csv.NewReader(filePath)
+			records, err := csvReader.ReadAll()
+			if err != nil {
+				sugar.Errorw("Error parsing .csv filePath",
+					"error_message", err,
+					"filePath_path", filePath,
+				)
+			}
+
+			parsedRecord := newData(file, records)
+
+			channel <- *parsedRecord
+
+			sugar.Infow("Success in parsing .csv file",
+				"file_path", parsedRecord.name,
+				"number_of_headers", len(parsedRecord.headers),
 			)
-		}
-
-		defer filePath.Close()
-		csvReader := csv.NewReader(filePath)
-		records, err := csvReader.ReadAll()
-		if err != nil {
-			sugar.Errorw("Error parsing .csv filePath",
-				"error_message", err,
-				"filePath_path", filePath,
-			)
-		}
-
-		parsedRecord := newData(file, records)
-		dataSlice = append(dataSlice, parsedRecord)
-
-		// sugar.Infow("Success in parsing .csv file",
-		// 	"file_path", parsedRecord.name,
-		// 	"headers", parsedRecord.headers,
-		// 	"values", parsedRecord.values,
-		// )
+		}(file)
 	}
+
+	for i := 0; i < len(files); i++ {
+		parsedData := <-channel
+		dataSlice = append(dataSlice, &parsedData)
+	}
+
 }
 
 // fetches all .csvs given a directory path
@@ -138,7 +148,7 @@ func main() {
 	outputPath := filepath.Join(".", "output")
 	_ = os.MkdirAll(outputPath, os.ModePerm)
 
-	cfg.OutputPaths = []string{"./debug.log"} //, "stderr"}
+	cfg.OutputPaths = []string{"./debug.log"}
 	logger, err := cfg.Build()
 	if err != nil {
 		panic(err)

@@ -1,5 +1,6 @@
 import csv
 import random
+import sys
 
 # simple script to generate random samples
 
@@ -21,7 +22,7 @@ def generate_samples(num_of_samples: int) -> None:
         count += 1
 
     for i in range(1, num_of_samples+1):
-        with open("sample_{}.csv".format(str(i).zfill(magnitude)), "w") as f:
+        with open("sample_{}.csv".format(str(i).zfill(count)), "w") as f:
             writer = csv.writer(f)
 
             headers = ['header_{}'.format(i) for i in range(1,15)]
@@ -31,4 +32,4 @@ def generate_samples(num_of_samples: int) -> None:
             writer.writerows(values)
 
 if __name__ == '__main__':
-    generate_samples(25)
+    generate_samples(int(sys.argv[1]))
