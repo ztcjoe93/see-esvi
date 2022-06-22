@@ -1,4 +1,5 @@
 ![](https://github.com/ztcjoe93/see-esvi/actions/workflows/build.yml/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/ztcjoe93/see-esvi/branch/master/graph/badge.svg?token=UI7L9SGL60)](https://codecov.io/gh/ztcjoe93/see-esvi)
 
 # See-ESVI, a CSV parser and modifier utility tool
 
