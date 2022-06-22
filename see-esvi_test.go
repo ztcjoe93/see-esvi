@@ -128,3 +128,17 @@ func (s *CliTestSuite) TestCliArgParseTargetFieldString() {
 		assert.Equal(s.T(), "someHeader", targetField)
 	})
 }
+
+func (s *CliTestSuite) TestInitializeNewData() {
+
+	path := "./somePath"
+	csvRecord := [][]string{{"header_1", "header_2"},
+		{"someVal", "somePal"}, {"cat", "dog"}}
+
+	dataStructure := newData(path, csvRecord)
+
+	assert.Equal(s.T(), "somePath", dataStructure.name)
+	assert.Equal(s.T(), []string{"header_1", "header_2"}, dataStructure.headers)
+	assert.Equal(s.T(), [][]string{{"someVal", "somePal"}, {"cat", "dog"}},
+		dataStructure.values)
+}

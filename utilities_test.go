@@ -22,19 +22,19 @@ func (s *UtilitiesTestSuite) TestTypeOfUtilityStringArg() {
 	var data interface{} = "someString"
 
 	returnVal := typeof(data)
-	assert.Equal(s.T(), returnVal, "string")
+	assert.Equal(s.T(), "string", returnVal)
 }
 
 func (s *UtilitiesTestSuite) TestTypeOfUtilityIntArg() {
 	var data interface{} = 123
 
 	returnVal := typeof(data)
-	assert.Equal(s.T(), returnVal, "int")
+	assert.Equal(s.T(), "int", returnVal)
 }
 
 func (s *UtilitiesTestSuite) TestTypeOfUtilityOtherArg() {
 	var data interface{} = make(map[int]string)
 
 	returnVal := typeof(data)
-	assert.Equal(s.T(), returnVal, "unknown")
+	assert.Equal(s.T(), "unknown", returnVal)
 }
