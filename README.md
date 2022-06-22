@@ -1,3 +1,5 @@
+![](https://github.com/ztcjoe93/see-esvi/actions/workflows/build.yml/badge.svg?branch=master)
+
 # See-ESVI, a CSV parser and modifier utility tool
 
 A utility tool to parse large amount of CSVs and modify targeted fields.
