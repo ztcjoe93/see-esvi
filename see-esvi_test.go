@@ -107,6 +107,20 @@ func (s *CliTestSuite) TestCliArgMultipleParsePathProvided() {
 	})
 }
 
+func (s *CliTestSuite) TestCliArgParseNoArgs() {
+	os.Args = []string{"golang_script"}
+	assert.Panics(s.T(), func() {
+		cliArgParse()
+	})
+}
+
+func (s *CliTestSuite) TestCliArgParseInvalidCommand() {
+	os.Args = []string{"golang_script", "boomBoomPow", "someFilePath"}
+	assert.Panics(s.T(), func() {
+		cliArgParse()
+	})
+}
+
 func (s *CliTestSuite) TestCliArgParsePathRecursive() {
 	os.Args = []string{"golang_script", "-r", "read", "someFilePath"}
 	assert.NotPanics(s.T(), func() {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -63,4 +64,32 @@ func (s *CommandTestSuite) TestGetTargetFieldInt() {
 
 	targetIndex := getTargetField()
 	assert.Equal(s.T(), 1, targetIndex)
+}
+
+func (s *CommandTestSuite) TestReadData() {
+	os.Args = []string{"golang_script", "-tf=0", "read", "someFilePath"}
+	cliArgParse()
+
+	dataSlice = []*Data{
+		{
+			name: "test",
+			headers: []string{
+				"header1", "header2", "someHeader",
+			},
+			values: [][]string{
+				{"val1", "val2", "val3"},
+			},
+		},
+	}
+
+	deferredOutput := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	readData()
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = deferredOutput
+
+	assert.Equal(s.T(), "val1\n", string(out))
 }
