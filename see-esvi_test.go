@@ -24,6 +24,7 @@ func (s *CliTestSuite) SetupTest() {
 	// to reset valFlag
 	val := ""
 	valFlag = &val
+	targetField = 0
 
 	cfg := zap.NewDevelopmentConfig()
 	_, err := os.Stat(".")
@@ -82,6 +83,7 @@ func (s *CliTestSuite) TestParseCommandInvalid() {
 }
 
 func (s *CliTestSuite) TestCliArgParseNoPathProvided() {
+	os.Args = []string{"golang_script", "read"}
 	assert.Panics(s.T(), func() {
 		cliArgParse()
 	})
